@@ -1,5 +1,7 @@
 ﻿using CRUD.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace CRUD.Controllers
@@ -9,51 +11,72 @@ namespace CRUD.Controllers
     public class MusicaController : ControllerBase
     {
         [HttpPost]
-        public IActionResult Criar(Musica musica)
+        public IActionResult Criar([FromBody] Musica musica)
         {
             Contexto contexto = new Contexto();
             contexto.Musicas.Add(musica);
             contexto.SaveChanges();
-            return Ok();
+            return Ok("Criado com sucesso!");
+        }
+
+        // api/musica/1
+        // api/musica?id=1
+        [HttpGet]
+        public IActionResult BuscarPorId([FromQuery] int id)
+        {
+            Contexto contexto = new Contexto();
+            var buscarPorId = contexto.Musicas
+                .Include(m => m.Cantor)
+                .FirstOrDefault(m => m.Id == id);
+            if (buscarPorId == null)
+            {
+                return Ok("Id não encontrado, por favor tente outro!");
+            }
+            return Ok(buscarPorId);
         }
 
         [HttpGet]
-        public IActionResult BuscarPorCantor([FromQuery] string nome)
+        [Route("BuscarPorNome")]
+        public IActionResult BuscarPorNome([FromQuery] string nome)
         {
             Contexto contexto = new Contexto();
-            var buscarMusica = contexto.Musicas.First(m => m.Cantor.Name == nome);
+            var buscarMusica = contexto.Musicas.FirstOrDefault(m => m.Cantor.Nome.ToLower() == nome);
+            if (buscarMusica == null)
+            {
+                return Ok("Cantor não encontrado, por favor tente outro!");
+            }
             return Ok(buscarMusica);
         }
 
         [HttpPut]
         public IActionResult Atualizar([FromBody] Musica musica)
         {
-            Contexto contexto = new Contexto();
-            var musicaDoBancoDeDados = contexto.Musicas.FirstOrDefault(m => m.Id == musica.Id);
+            Contexto contexto = new Contexto();            
+            var musicaDoBancoDeDados = contexto.Musicas.First(m => m.Id == musica.Id);
             musicaDoBancoDeDados.Nome = musica.Nome;
             musicaDoBancoDeDados.Cantor = musica.Cantor;
             musicaDoBancoDeDados.Genero = musica.Genero;
             contexto.Musicas.Update(musicaDoBancoDeDados);
             contexto.SaveChanges();
-            return Ok(musica);
+            return Ok(musicaDoBancoDeDados);
         }
 
-        [HttpDelete]
 
-        public IActionResult Deletar([FromQuery]int id)
+        [HttpDelete]
+        public IActionResult Deletar([FromQuery] int id)
         {
             Contexto contexto = new Contexto();
-            var deletarMusica = contexto.Musicas.FirstOrDefault(m => m.Id == id);
+            var deletarMusica = contexto.Musicas.FirstOrDefault(m => m.Id == id);           
             if (deletarMusica == null)
             {
                 return Ok("Musica não encontrada, por favor envie um Id valido");
             }
-            
+
             contexto.Musicas.Remove(deletarMusica);
             contexto.SaveChanges();
             return Ok("Musica excluida com sucesso!");
         }
-        
+
 
     }
 

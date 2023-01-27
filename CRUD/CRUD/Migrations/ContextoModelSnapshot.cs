@@ -22,14 +22,12 @@ namespace CRUD.Migrations
             modelBuilder.Entity("CRUD.Models.Cantor", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("DataDeNascimento")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Nome")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -44,9 +42,6 @@ namespace CRUD.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CantorId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Genero")
                         .HasColumnType("nvarchar(max)");
 
@@ -55,17 +50,20 @@ namespace CRUD.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CantorId");
-
                     b.ToTable("Musicas");
+                });
+
+            modelBuilder.Entity("CRUD.Models.Cantor", b =>
+                {
+                    b.HasOne("CRUD.Models.Musica", null)
+                        .WithOne("Cantor")
+                        .HasForeignKey("CRUD.Models.Cantor", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CRUD.Models.Musica", b =>
                 {
-                    b.HasOne("CRUD.Models.Cantor", "Cantor")
-                        .WithMany()
-                        .HasForeignKey("CantorId");
-
                     b.Navigation("Cantor");
                 });
 #pragma warning restore 612, 618
