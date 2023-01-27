@@ -14,6 +14,15 @@ namespace CRUD.Controllers
         public IActionResult Criar([FromBody] Musica musica)
         {
             Contexto contexto = new Contexto();
+            var criarNome = contexto.Musicas.Include(m => m.Cantor.Nome);               
+            if (musica.Nome == null)
+            {
+                return Ok("Por favor, inserir um nome válido");
+            }
+            if (musica.Cantor.Nome == null)
+            {
+                return Ok("Por favor, inserir um nome válido");
+            }
             contexto.Musicas.Add(musica);
             contexto.SaveChanges();
             return Ok("Criado com sucesso!");
@@ -27,7 +36,8 @@ namespace CRUD.Controllers
             Contexto contexto = new Contexto();
             var buscarPorId = contexto.Musicas
                 .Include(m => m.Cantor)
-                .FirstOrDefault(m => m.Id == id);
+                .FirstOrDefault(m => m.Id == id);         
+
             if (buscarPorId == null)
             {
                 return Ok("Id não encontrado, por favor tente outro!");
@@ -41,6 +51,8 @@ namespace CRUD.Controllers
         {
             Contexto contexto = new Contexto();
             var buscarMusica = contexto.Musicas.FirstOrDefault(m => m.Cantor.Nome.ToLower() == nome);
+            buscarMusica = contexto.Musicas.Include(m => m.Cantor)
+                .FirstOrDefault(m => m.Cantor.Nome == nome);
             if (buscarMusica == null)
             {
                 return Ok("Cantor não encontrado, por favor tente outro!");
@@ -54,7 +66,8 @@ namespace CRUD.Controllers
             Contexto contexto = new Contexto();            
             var musicaDoBancoDeDados = contexto.Musicas.First(m => m.Id == musica.Id);
             musicaDoBancoDeDados.Nome = musica.Nome;
-            musicaDoBancoDeDados.Cantor = musica.Cantor;
+            musicaDoBancoDeDados.Cantor.Nome = musica.Cantor.Nome;
+            musicaDoBancoDeDados.Cantor.DataDeNascimento = musica.Cantor.DataDeNascimento;
             musicaDoBancoDeDados.Genero = musica.Genero;
             contexto.Musicas.Update(musicaDoBancoDeDados);
             contexto.SaveChanges();
