@@ -1,4 +1,5 @@
-﻿using CRUD.Models;
+﻿using CRUD.DTO;
+using CRUD.Models;
 using CRUD.Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
@@ -12,29 +13,26 @@ namespace CRUD.Controllers
     [ApiController]
     [Route("api/[Controller]")]
     public class MusicaController : ControllerBase
-    {   
-                
+    {
         [HttpPost]
         public IActionResult Criar([FromBody] Musica musica)
         {
             MusicaRepository musicaRepository = new MusicaRepository();
+            ValidadorDeMusica validadorDeMusica = musica.EhValido();
+            if (validadorDeMusica.Status == false)
+            {
+                return BadRequest(validadorDeMusica.Mensagem);
+            }
             musicaRepository.Adicionar(musica);
-            if (musica.Nome == null)
-            {
-                return Ok("Por favor, inserir um nome válido");
-            }
-            if (musica.Cantor.Nome == null)
-            {
-                return Ok("Por favor, inserir um nome válido");
-            }
-
-            return Ok("Criado com sucesso!");
+            return Ok(validadorDeMusica.Mensagem);
         }
+
         // api/musica/1
         // api/musica?id=1
         [HttpGet]
         public IActionResult GetById([FromQuery] int id)
         {
+            //proibir busca no banco por id <= 0
             MusicaRepository musica = new MusicaRepository();
             var buscar = musica.BuscarPorId(id);
             return (buscar);
