@@ -51,9 +51,18 @@ namespace CRUD.Controllers
         [Route("BuscarPorNome")]
         public IActionResult BuscarPorNome([FromQuery] string nome)
         {
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                return BadRequest("Cantor não encontrado, por favor tente outro!");
+            }           
             MusicaRepository musicaRepository = new MusicaRepository();
-            var buscar = musicaRepository.BuscarPorNome(nome);           
-            return (buscar);
+            var buscar = musicaRepository.BuscarPorNome(nome);         
+           
+            if (buscar == null)
+            {
+                return BadRequest("Cantor não encontrado, por favor tente outro!");
+            }
+            return Ok(buscar);           
         }
 
         [HttpPut]
