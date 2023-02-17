@@ -27,24 +27,14 @@ namespace CRUD.Repository.Interfaces
 
         }
         // Nao pode retornar um IActionResult e dependendo das condições vir antes do request. 
-        public IActionResult BuscarPorNome(string nome)
+        public Musica BuscarPorNome(string nome)
         {
             Contexto contexto = new Contexto();
             var buscarPorNome = contexto.Musicas.FirstOrDefault(m => m.Cantor.Nome.ToLower() == nome);
             contexto.Musicas
                 .Include(m => m.Cantor)
-                .FirstOrDefault(m => m.Cantor.Nome == nome);
-            if (buscarPorNome == null)
-            {
-                return BadRequest("Cantor não encontrado, por favor tente outro!");
-            }
-            //fiz essa mudança caso tentem buscar por espaço vazio
-            if (string.IsNullOrWhiteSpace(nome))
-            {
-                return BadRequest("Cantor não encontrado, por favor tente outro!");
-            }
-            return Ok(buscarPorNome);
-
+                .FirstOrDefault(m => m.Cantor.Nome == nome);  
+            return buscarPorNome;
         }
         public IActionResult Atualizar(Musica musica)
         {
