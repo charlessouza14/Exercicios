@@ -33,9 +33,18 @@ namespace CRUD.Controllers
         public IActionResult GetById([FromQuery] int id)
         {
             //proibir busca no banco por id <= 0
-            MusicaRepository musica = new MusicaRepository();
+            if (id <= 0)
+            {
+                return BadRequest("Por favor inserir um Id maior que 0");
+            }
+            MusicaRepository musica = new MusicaRepository();          
             var buscar = musica.BuscarPorId(id);
-            return (buscar);
+            if (buscar == null)
+            {
+                return BadRequest("Id não encontrado, por favor tente outro!");
+            }         
+            return Ok(buscar);
+          
         }
 
         [HttpGet]
@@ -59,13 +68,8 @@ namespace CRUD.Controllers
         public IActionResult Deletar([FromQuery] int id)
         {
             MusicaRepository musicaRepository = new MusicaRepository();
-            musicaRepository.Deletar(id);
-            if (musicaRepository == null)
-            {
-                return Ok("Musica não encontrada, por favor envie um Id valido");
-            }
-
-            return Ok("Musica excluida com sucesso!");
+            var deletar = musicaRepository.Deletar(id);         
+            return (deletar);
         }
 
 

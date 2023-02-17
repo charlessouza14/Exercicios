@@ -17,20 +17,16 @@ namespace CRUD.Repository.Interfaces
         }
 
         // se for void não terá retorno, logo terei que mudar o modificador de acesso.
-        public IActionResult BuscarPorId(int id)
+        public Musica BuscarPorId(int id)
         {
             Contexto contexto = new Contexto();
             var buscarPorId = contexto.Musicas
                 .Include(m => m.Cantor)
                 .FirstOrDefault(m => m.Id == id);
-
-            if (buscarPorId == null)
-            {
-                return Ok("Id não encontrado, por favor tente outro!");
-            }
-            return Ok(buscarPorId);
+            return buscarPorId;
 
         }
+        // Nao pode retornar um IActionResult e dependendo das condições vir antes do request. 
         public IActionResult BuscarPorNome(string nome)
         {
             Contexto contexto = new Contexto();
@@ -40,7 +36,12 @@ namespace CRUD.Repository.Interfaces
                 .FirstOrDefault(m => m.Cantor.Nome == nome);
             if (buscarPorNome == null)
             {
-                return Ok("Cantor não encontrado, por favor tente outro!");
+                return BadRequest("Cantor não encontrado, por favor tente outro!");
+            }
+            //fiz essa mudança caso tentem buscar por espaço vazio
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                return BadRequest("Cantor não encontrado, por favor tente outro!");
             }
             return Ok(buscarPorNome);
 
@@ -62,12 +63,22 @@ namespace CRUD.Repository.Interfaces
             return Ok(atualizar);
         }
 
-        public void Deletar(int id)
+        public IActionResult Deletar(int id)
         {
             Contexto contexto = new Contexto();
             var deletar = contexto.Musicas.FirstOrDefault(m => m.Id == id);
+            if (deletar == null)
+            {
+                return BadRequest("Musica não encontrada, por favor envie um Id valido");
+            }
+            if (id <= 0)
+            {
+                return BadRequest("Musica não encontrada, por favor envie um Id valido");
+            }          
+           
             contexto.Musicas.Remove(deletar);
             contexto.SaveChanges();
+            return Ok("Música excluida com sucesso!");
 
         }
         
